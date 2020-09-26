@@ -1,0 +1,113 @@
+clc; clear
+
+%maxEfficiency = sqrt((pi*AR*e)/4*CD);
+
+% assumed sweopt angle = 0º
+
+AR = linspace(0.1,30, 1000);
+
+figure
+subplot(1,3,1)
+plot(AR, e(AR))
+xlabel("AR")
+ylabel("e")
+grid minor
+title("e vs AR")
+
+subplot(1,3,2)
+loglog(AR, k(AR,e(AR)))
+xlabel("AR")
+ylabel("k")
+grid minor
+title("k vs AR")
+
+
+C_D0 = 0.025;
+
+
+
+subplot(1,3,3)
+plot(AR, MaxLD(AR, C_D0))
+xlabel("AR")
+ylabel("MaxLD")
+grid minor
+title("MaxLD vs AR")
+
+
+
+
+thisAR = 9;
+thisR = r(thisAR, C_D0);
+
+x = linspace(-3,3);
+
+figure
+hold on
+plot(x, x.^3 - (thisR.^2)*(C_D0 + k(thisAR, e(thisAR))*x.^2).^2);
+hold off
+grid minor
+
+
+
+                      
+C_L_array = zeros(1000,1);
+L_D_array = zeros(1000,1);
+
+for i=1:length(AR)
+    [C_L, L_D] = get_min_power(AR(i), C_D0);
+    C_L_array(i) = C_L;
+    L_D_array(i) = L_D;
+end
+
+figure
+subplot(1,2,1)
+plot(AR, C_L_array)
+grid minor
+ylabel("C_L")
+xlabel("AR")
+
+subplot(1,2,2)
+plot(AR, L_D_array)
+grid minor
+ylabel("L_D")
+xlabel("AR")
+
+
+
+function [C_L, L_D] = get_min_power(AR, C_D0)
+    C_L_values = get_roots(AR, C_D0);
+    C_L_real_values = real(C_L_values(abs(imag(C_L_values)) < 10^-5));
+    
+    sizeRes = size(C_L_real_values);
+    if sizeRes(1) > 0
+        C_L = C_L_real_values(1);
+        L_D = C_L/(C_D0 + k(AR,e(AR))*C_L^2);
+    else
+        C_L = NaN;
+        L_D = NaN;
+    end
+end
+
+function k = k(AR, e)
+    k = (pi .* AR .* e).^(-1);
+end
+
+function e = e(AR)
+    e = 1.78*(1-0.045 * AR.^0.68)-0.64;
+end
+
+function MaxLD = MaxLD(AR, C_D0)
+    MaxLD = sqrt(pi * AR .* e(AR) / (4*C_D0));
+end
+
+function r = r(AR, C_D0)
+    r = (3^(3/4))/4 * (pi * AR * e(AR))^(3/4)/C_D0^(1/4);
+end
+
+function thisRoots = get_roots(AR, C_D0) 
+    thisRoots = roots([ r(AR, C_D0).^2 * k(AR,e(AR)).^2, ...
+                         -1, ...
+                          2 * r(AR, C_D0).^2 * k(AR,e(AR)) * C_D0, ...
+                          0, ...
+                          (r(AR, C_D0)).^2*(C_D0.^2)]);
+end
