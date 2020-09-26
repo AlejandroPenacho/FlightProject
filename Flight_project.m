@@ -3,9 +3,12 @@ clear all
 clc
 
 %% Part 2
-% Battery specifications
+% Battery specifications (In order)
 % Rhino 6200mAh 4S 50C Lipo Battery Pack w/XT90
 % Turnigy Rapid 5500mAh 4S2P 140C Hardcase Lipo Battery Pack w/XT90 Connector
+% Turnigy 5000mAh 3S 20C Lipo Pack w/XT-60
+% Turnigy Nano-Tech Plus 5000mAh 4S 70C Lipo Pack w/XT90
+
 
 Vmin = 20.8/3.6; %Required speed
 Vmax = 15;
